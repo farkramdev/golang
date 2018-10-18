@@ -1,0 +1,21 @@
+version: "3.1"
+
+services:
+  app:
+    image: golang:alpine
+    tty: true
+    volumes:
+      - .:/go/src/go-with-compose
+    working_dir: /go/src/go-with-compose
+    command: go run main.go
+    environment:
+      DB_URL: db:27017
+    links:
+      - db
+
+  db:
+    image: mongo:3.2.21-jessie
+    restart: always
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: root
+      MONGO_INITDB_ROOT_PASSWORD: root123456

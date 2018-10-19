@@ -1,21 +1,23 @@
-version: "3.1"
-
+version: "3.3"
 services:
   app:
-    image: golang:alpine
-    tty: true
+    container_name: "api-auth"
+    build: .
     volumes:
-      - .:/go/src/go-with-compose
-    working_dir: /go/src/go-with-compose
-    command: go run main.go
+      - .:/go/src/app
     environment:
       DB_URL: db:27017
+    depends_on:
+      - db
     links:
       - db
 
   db:
     image: mongo:3.2.21-jessie
+    container_name: "mongo"
     restart: always
+    ports:
+      - "27100:27017"
     environment:
       MONGO_INITDB_ROOT_USERNAME: root
       MONGO_INITDB_ROOT_PASSWORD: root123456

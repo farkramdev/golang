@@ -1,42 +1,70 @@
 package main
 
 import (
-	"fmt"
-	"github.com/gorilla/mux"
-	"gopkg.in/mgo.v2"
-	"gopkg.in/mgo.v2/bson"
-	"log"
+	// "github.com/farkramdev/golang/api"
+	// "github.com/farkramdev/golang/service"
+	"github.com/labstack/echo"
+	"github.com/labstack/echo/middleware"
 	"net/http"
 )
 
-func AllMoviesEndPoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "not implemented yet !")
-}
-
-func FindMovieEndpoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "not implemented yet !")
-}
-
-func CreateMovieEndPoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "not implemented yet !")
-}
-
-func UpdateMovieEndPoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "not implemented yet !")
-}
-
-func DeleteMovieEndPoint(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "not implemented yet !")
-}
+const projectID = "jwt-authen"
 
 func main() {
-	r := mux.NewRouter()
-	r.HandleFunc("/movies", AllMoviesEndPoint).Methods("GET")
-	r.HandleFunc("/movies", CreateMovieEndPoint).Methods("POST")
-	r.HandleFunc("/movies", UpdateMovieEndPoint).Methods("PUT")
-	r.HandleFunc("/movies", DeleteMovieEndPoint).Methods("DELETE")
-	r.HandleFunc("/movies/{id}", FindMovieEndpoint).Methods("GET")
-	if err := http.ListenAndServe(":3000", r); err != nil {
-		log.Fatal(err)
-	}
+	// serviceAccount, err := ioutil.ReadFile("service-account.json")
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+	// err = api.Init(api.Config{
+	// 	ServiceAccountJSON: serviceAccount,
+	// 	ProjectID:          projectID,
+	// })
+	// if err != nil {
+	// 	log.Fatal(err)
+	// }
+
+	e := echo.New()
+
+	e.Use(
+		middleware.Recover(),
+		middleware.Secure(),
+		middleware.Logger(),
+		middleware.Gzip(),
+		middleware.BodyLimit("2M"),
+		middleware.CSRFWithConfig(middleware.CSRFConfig{
+			TokenLookup: "header:X-XSRF-TOKEN",
+		}),
+		middleware.CORSWithConfig(middleware.CORSConfig{
+			AllowOrigins: []string{
+				"http://localhost:8080",
+			},
+			AllowHeaders: []string{
+				echo.HeaderOrigin,
+				echo.HeaderContentLength,
+				echo.HeaderAcceptEncoding,
+				echo.HeaderContentType,
+				echo.HeaderAuthorization,
+			},
+			AllowMethods: []string{
+				echo.GET,
+				echo.POST,
+			},
+			MaxAge: 3600,
+		}),
+	)
+	// Health check
+	e.GET("/_ah/health", func(c echo.Context) error {
+		return c.String(http.StatusOK, "OK")
+	})
+
+	// Register services
+	// service.Auth(e.Group("/auth"))
+
+	e.Start(":9000")
+
+	// e.Start(standard.WithConfig(engine.Config{
+	// 	Address:      ":9000",
+	// 	ReadTimeout:  30 * time.Second,
+	// 	WriteTimeout: 30 * time.Second,
+	// }))
 }

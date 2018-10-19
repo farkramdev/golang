@@ -54,7 +54,7 @@ func main() {
 	)
 	// Health check
 	e.GET("/_ah/health", func(c echo.Context) error {
-		return c.String(http.StatusOK, "OK")
+		return c.String(http.StatusOK, "OK KKKKK")
 	})
 
 	// Register services
